@@ -1,20 +1,23 @@
 import { useEffect, useState } from 'react';
 import Task from '../components/Task'
-import {db} from '../firebase'
-import { collection, query, onSnapshot, updateDoc, doc, addDoc, deleteDoc, serverTimestamp } from 'firebase/firestore'
+import { db, auth } from '../firebase'
+import { collection, query, onSnapshot, updateDoc, doc, addDoc, getDoc, deleteDoc, serverTimestamp } from 'firebase/firestore'
 
 const Tasks = () => {
 	const [tasks, setTasks] = useState([]);
 	const [input, setInput] = useState('');
+	const [userDetails, setUserDetails] = useState(null);
+	const user = auth.currentUser;
 
 	// Create
 	const addTask = async (e) => {
 		e.preventDefault(e)
-		if(input === '') {
+		const user = auth.currentUser
+		if (input === '') {
 			alert('Please enter a task')
 			return
 		}
-		await addDoc(collection(db, 'Tasks'), {
+		await addDoc(collection(db, 'Tasks', user.uid, "UserTasks"), {
 			text: input,
 			completed: false,
 			createdAt: serverTimestamp(),
@@ -23,38 +26,86 @@ const Tasks = () => {
 	}
 
 	// Read
+
 	useEffect(() => {
-		const q = query(collection(db, 'Tasks'))
-		const unsub = onSnapshot(q, (querySnapshot) => {
-			let tasksArr = []
-			querySnapshot.forEach((doc) => {
-				tasksArr.push({...doc.data(), id: doc.id})
-			});
-			setTasks(tasksArr)
-		})
-		return() => unsub()
-	},[])
+		const fetchTasks = async () => {
+			if (!user || !user.uid) return;
+
+			try {
+				const q = query(collection(db, "Tasks", user.uid, "UserTasks"));
+
+				const unsub = onSnapshot(q, (querySnapshot) => {
+					let tasksArr = [];
+					querySnapshot.forEach((doc) => {
+						tasksArr.push({ ...doc.data(), id: doc.id });
+					});
+					setTasks(tasksArr);
+				});
+
+				return () => unsub();
+			} catch (error) {
+				console.error("Error fetching tasks:", error);
+			}
+		};
+
+		fetchTasks();
+	}, [user?.uid]);
+
+	const fetchUserDetails = async () => {
+		auth.onAuthStateChanged(async (user) => {
+			const docRef = doc(db, "Users", user.uid);
+			const docSnap = await getDoc(docRef);
+			if (docSnap.exists()) {
+				setUserDetails(docSnap.data());
+				console.log(docSnap.data());
+			} else {
+				console.log("No such document!");
+			}
+		});
+	}
+
+	useEffect(() => {
+		fetchUserDetails();
+	}, []);
 
 	// Update
 	const toggleComplete = async (task) => {
-		await updateDoc(doc(db, 'Tasks', task.id), {
-			completed: !task.completed
-		})
-	}
+		const user = auth.currentUser;
+		if (!user || !user.uid) return console.error("User not authenticated");
+
+		try {
+			const taskRef = doc(db, "Tasks", user.uid, "UserTasks", task.id);
+			await updateDoc(taskRef, { completed: !task.completed });
+		} catch (error) {
+			console.error("Error updating task:", error);
+		}
+	};
 
 	// Delete
 	const deleteTask = async (task) => {
-		await deleteDoc(doc(db, 'Tasks', task))
-	}
+		const user = auth.currentUser;
+		if (!user || !user.uid) return console.error("User not authenticated");
+
+		try {
+			const taskRef = doc(db, "Tasks", user.uid, "UserTasks", task.id);
+			await deleteDoc(taskRef);
+		} catch (error) {
+			console.error("Error deleting task:", error);
+		}
+	};
 
 
 	return (
 		<>
-			<div className="flex-1 p-6">
+			<div className="flex-1 p-6 lg:ml-72">
 
 				<div className="flex justify-between items-center">
 					<h2 className="text-black text-2xl font-bold font-['Lexend Deca']">My Tasks</h2>
-					<span className="text-black text-2xl font-bold font-['Lexend Deca']">Ermuun</span>
+					{userDetails ? (
+						<span className="text-black text-2xl font-bold font-['Lexend Deca']">{userDetails.uname}</span>
+					) : (
+						<p>Loading...</p>
+					)}
 				</div>
 
 				<div className="flex mt-6 w-1/2">
@@ -66,9 +117,20 @@ const Tasks = () => {
 
 				<ul className="mt-6 space-y-4 list-none">
 					{
-						tasks.map((task) => (
-							<Task key={task.id} task={task} tasks={tasks} setTasks={setTasks} toggleComplete={toggleComplete} deleteTask={deleteTask} />
-						))
+						tasks.length > 0 ? (
+							tasks.map((task) => (
+								<Task
+									key={task.id}
+									task={task}
+									tasks={tasks}
+									setTasks={setTasks}
+									toggleComplete={() => toggleComplete(task)}
+									deleteTask={() => deleteTask(task)}
+								/>
+							))
+						) : (
+							<p>No tasks available</p>
+						)
 					}
 				</ul>
 			</div>
