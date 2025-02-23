@@ -1,8 +1,14 @@
 import { NavLink } from "react-router-dom";
 import { auth } from "../firebase";
+import React, { useState } from 'react';
 
 
 const SideBar = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleToggleMenu = () => {
+    setIsOpen(!isOpen);
+  };
 
   async function handleLogout() {
     try {
@@ -15,21 +21,23 @@ const SideBar = () => {
   }
 
   return (
-    <div className="fixed h-screen w-full lg:w-72 bg-violet-400/50 rounded-tr-2xl rounded-br-2xl shadow-md p-6">
-      <h1 className="text-black text-3xl font-bold font-['Lexend Deca'] text-center">TaskFlow</h1>
-
-      {/* <div className="absolute top-6 right-6 md:hidden md:rounded-br-2xl md:rounded-bl-2xl" data-menu-button>
-        <div class="w-6 h-6 relative">
-          <div class="w-6 h-6 left-0 top-0 absolute"></div>
-          <div data-svg-wrapper class="left-[3px] top-[6px] absolute">
-            <svg width="18" height="12" viewBox="0 0 18 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M0 12V10H18V12H0ZM0 7V5H18V7H0ZM0 2V0H18V2H0Z" fill="#1C1B1F" />
-            </svg>
+    <div className="lg:fixed lg:h-screen w-full lg:w-72 bg-violet-400/50 lg:rounded-r-2xl lg:rounded-bl-none shadow-md p-6 rounded-b-2xl">
+      <div className="flex justify-center">
+        <h1 className="text-black text-3xl font-bold font-['Lexend Deca'] text-center">TaskFlow</h1>
+        <div className="absolute top-6 right-6 lg:hidden" onClick={handleToggleMenu}>
+          <div class="w-8 h-8 relative">
+            <div class="w-8 h-8 left-0 top-0 absolute"></div>
+            <div data-svg-wrapper class="left-[4px] top-[12px] absolute">
+              <svg width="24" height="16" viewBox="0 0 24 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 16V13.3333H24V16H0ZM0 9.33333V6.66667H24V9.33333H0ZM0 2.66667V0H24V2.66667H0Z" fill="#1C1B1F" />
+              </svg>
+            </div>
           </div>
         </div>
-      </div> */}
+      </div>
 
-      <nav className="mt-8 space-y-4 flex flex-col h-[90%] justify-between">
+      <nav className={`mt-8 space-y-4 lg:flex flex-col h-[90%] justify-between ${isOpen ? 'block' : 'hidden'} `}>
+        
         <div className="space-y-4 flex-1 overflow-auto">
           <div className="flex items-center gap-x-2">
             <div className="w-6 h-6 relative">
@@ -97,7 +105,7 @@ const SideBar = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-x-2">
+        <div className="flex items-center gap-x-2 mt-auto">
           <div class="w-6 h-6 relative">
             <div class="w-6 h-6 left-0 top-0 absolute"></div>
             <div data-svg-wrapper class="left-[3px] top-[3px] absolute">
@@ -106,7 +114,7 @@ const SideBar = () => {
               </svg>
             </div>
           </div>
-          <button className="text-black text-lg font-bold font-['Lexend Deca'] block cursor-pointer" onClick={handleLogout}>Log Out</button>
+          <button className="text-black text-lg font-bold font-['Lexend Deca'] block cursor-pointer hover:text-gray-600" onClick={handleLogout}>Log Out</button>
         </div>
       </nav>
     </div>

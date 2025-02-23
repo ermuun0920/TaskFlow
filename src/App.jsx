@@ -10,7 +10,7 @@ import { useState, useEffect } from "react";
 
 function Layout() {
   const location = useLocation();
-  const hideSidebarPaths = ['/LogIn', '/Register']; // Add other paths if needed
+  const hideSidebarPaths = ['/LogIn', '/Register', '/']; // Add other paths if needed
 
   const [user, setUser] = useState();
   useEffect(() => {
