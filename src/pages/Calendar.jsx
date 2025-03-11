@@ -1,43 +1,26 @@
 import { useEffect, useState } from 'react';
+import { db, auth } from '../firebase';
+import { collection, query, onSnapshot, updateDoc, doc, addDoc, getDoc, deleteDoc, where } from 'firebase/firestore';
+import ReactCalendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 import Task from '../components/Task'
-import { db, auth } from '../firebase'
-import { collection, query, onSnapshot, updateDoc, doc, addDoc, getDoc, deleteDoc, serverTimestamp } from 'firebase/firestore'
+import "react-calendar/dist/Calendar.css";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { twMerge } from "tailwind-merge";
 
-const Tasks = () => {
-	const [date, setDate] = useState(new Date());
-	const [tasks, setTasks] = useState([]);
-	const [input, setInput] = useState('');
+const Calendar = () => {
 	const [userDetails, setUserDetails] = useState(null);
+	const [tasks, setTasks] = useState([]);
+	const [date, setDate] = useState(new Date());
 	const user = auth.currentUser;
-
-	// Create
-	const addTask = async (e) => {
-		e.preventDefault(e)
-		const user = auth.currentUser
-		if (input === '') {
-			alert('Please enter a task')
-			return
-		}
-
-		const selectedDate = date.toISOString().split("T")[0];
-
-		await addDoc(collection(db, 'Tasks', user.uid, "UserTasks"), {
-			text: input,
-			completed: false,
-			createdAt: serverTimestamp(),
-			date: selectedDate
-		})
-		setInput('')
-	}
-
-	// Read
 
 	useEffect(() => {
 		const fetchTasks = async () => {
 			if (!user || !user.uid) return;
 
 			try {
-				const q = query(collection(db, "Tasks", user.uid, "UserTasks"));
+				const selectedDate = date.toISOString().split("T")[0]; // Format: YYYY-MM-DD
+				const q = query(collection(db, "Tasks", user.uid, "UserTasks"), where("date", "==", selectedDate));
 
 				const unsub = onSnapshot(q, (querySnapshot) => {
 					let tasksArr = [];
@@ -54,7 +37,7 @@ const Tasks = () => {
 		};
 
 		fetchTasks();
-	}, [user?.uid]);
+	}, [user?.uid, date]);
 
 	const fetchUserDetails = async () => {
 		auth.onAuthStateChanged(async (user) => {
@@ -67,13 +50,12 @@ const Tasks = () => {
 				console.log("No such document!");
 			}
 		});
-	}
+	};
 
 	useEffect(() => {
 		fetchUserDetails();
 	}, []);
 
-	// Update
 	const toggleComplete = async (task) => {
 		const user = auth.currentUser;
 		if (!user || !user.uid) return console.error("User not authenticated");
@@ -86,7 +68,6 @@ const Tasks = () => {
 		}
 	};
 
-	// Delete
 	const deleteTask = async (task) => {
 		const user = auth.currentUser;
 		if (!user || !user.uid) return console.error("User not authenticated");
@@ -99,11 +80,9 @@ const Tasks = () => {
 		}
 	};
 
-
 	return (
 		<>
 			<div className="flex-1 p-6 lg:ml-72">
-
 				<div className="flex justify-between items-center">
 					<h2 className="text-black text-2xl font-bold font-['Lexend Deca']">My Tasks</h2>
 					{userDetails ? (
@@ -113,16 +92,27 @@ const Tasks = () => {
 					)}
 				</div>
 
-				<div className="flex mt-6 w-1/2">
-					<input value={input} onChange={(e) => setInput(e.target.value)} type="text" placeholder='Add a new task' className="flex-grow px-3 py-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-purple-400" />
-					<button onClick={addTask} className="bg-violet-400 text-white px-5 py-2 rounded-r-lg hover:bg-violet-600">
-						Add
-					</button>
-				</div>
-
-				<ul className="mt-6 space-y-4 list-none">
-					{
-						tasks.length > 0 ? (
+				<div className="mt-4 p-4 bg-white shadow-lg rounded-xl ">
+					<ReactCalendar
+						onChange={setDate}
+						value={date}
+						className="w-full border-none p-2 rounded-lg"
+						prevLabel={<ChevronLeft className="w-6 h-6 text-gray-600 hover:text-gray-900 transition" />}
+						nextLabel={<ChevronRight className="w-6 h-6 text-gray-600 hover:text-gray-900 transition" />}
+						tileClassName={({ date: tileDate, view }) =>
+							twMerge(
+								"py-2 text-center rounded-lg transition-all text-sm font-medium",
+								"hover:bg-gray-200",
+								tileDate.toDateString() === new Date().toDateString() && "bg-blue-600 text-white",
+								tileDate.toDateString() === date.toDateString() && "bg-blue-400 text-white",
+								[0, 6].includes(tileDate.getDay()) && "text-red-500" // Style weekends
+							)
+						}
+						calendarClassName="rounded-lg bg-gray-50 p-2 shadow-sm"
+					/>
+					<h2 className="text-lg font-semibold mt-4">Tasks for {date.toDateString()}</h2>
+					<ul className="mt-2 space-y-2">
+						{tasks.length > 0 ? (
 							tasks.map((task) => (
 								<Task
 									key={task.id}
@@ -134,14 +124,13 @@ const Tasks = () => {
 								/>
 							))
 						) : (
-							<p>No tasks available</p>
-						)
-					}
-				</ul>
+							<p className="text-gray-500">No tasks available</p>
+						)}
+					</ul>
+				</div>
 			</div>
-
 		</>
 	);
-}
+};
 
-export default Tasks
+export default Calendar;

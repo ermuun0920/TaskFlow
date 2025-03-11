@@ -2,3 +2,4 @@ npm install react-router-dom
 npm install tailwindcss @tailwindcss/vite
 npm install firebase
 npm install --save react-toastify
+npm install react-calendar lucide-react tailwind-merge
