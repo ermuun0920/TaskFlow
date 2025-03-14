@@ -4,6 +4,7 @@ import { auth } from "../firebase";
 import { toast, ToastContainer } from 'react-toastify';
 import "react-toastify/dist/ReactToastify.css";
 import { Link } from 'react-router-dom';
+import SignInwithGoogle from "../components/SignInWithGoogle";
 
 const LogIn = () => {
 	const [email, setEmail] = useState("");
@@ -61,6 +62,7 @@ const LogIn = () => {
 								Create One
 							</Link>
 						</div>
+						<SignInwithGoogle/>
 					</form>
 				</div>
 

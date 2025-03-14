@@ -10,6 +10,7 @@ const Home = () => {
 
 	const fetchUserDetails = async () => {
 		auth.onAuthStateChanged(async (user) => {
+			setUserDetails(userDetails);
 			const docRef = doc(db, "Users", user.uid);
 			const docSnap = await getDoc(docRef);
 			if (docSnap.exists()) {

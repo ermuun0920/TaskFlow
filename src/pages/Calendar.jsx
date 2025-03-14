@@ -16,6 +16,7 @@ const Calendar = () => {
 
 	useEffect(() => {
 		const fetchTasks = async () => {
+			setUserDetails(userDetails);
 			if (!user || !user.uid) return;
 
 			try {
