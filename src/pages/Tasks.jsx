@@ -19,15 +19,22 @@ const Tasks = () => {
 			return
 		}
 
+		// const selectedDate = date ? date.toISOString().split("T")[0] : new Date().toISOString().split("T")[0];
 		const selectedDate = date.toISOString().split("T")[0];
 
-		await addDoc(collection(db, 'Tasks', user.uid, "UserTasks"), {
-			text: input,
-			completed: false,
-			createdAt: serverTimestamp(),
-			date: selectedDate
-		})
-		setInput('')
+		try {
+			await addDoc(collection(db, 'Tasks', user.uid, "UserTasks"), {
+				text: input,
+				completed: false,
+				createdAt: serverTimestamp(),
+				date: selectedDate 
+			});
+
+			// Reset input field
+			setInput('');
+		} catch (error) {
+			console.error("Error adding task:", error);
+		}
 	}
 
 	// Read
@@ -86,6 +93,7 @@ const Tasks = () => {
 			console.error("Error updating task:", error);
 		}
 	};
+	
 
 	// Delete
 	const deleteTask = async (task) => {
@@ -115,7 +123,19 @@ const Tasks = () => {
 				</div>
 
 				<div className="flex mt-6 w-1/2">
-					<input value={input} onChange={(e) => setInput(e.target.value)} type="text" placeholder='Add a new task' className="flex-grow px-3 py-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-purple-400" />
+					<input
+						value={input}
+						onChange={(e) => setInput(e.target.value)}
+						type="text"
+						placeholder='Add a new task'
+						className="flex-grow px-3 py-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-purple-400"
+					/>
+					<input
+						type="date"
+						value={date.toISOString().split("T")[0]}
+						onChange={(e) => setDate(new Date(e.target.value))}
+						className="border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
+					/>
 					<button onClick={addTask} className="bg-violet-400 text-white px-5 py-2 rounded-r-lg hover:bg-violet-600">
 						Add
 					</button>
@@ -132,6 +152,7 @@ const Tasks = () => {
 									setTasks={setTasks}
 									toggleComplete={() => toggleComplete(task)}
 									deleteTask={() => deleteTask(task)}
+									date={date}
 								/>
 							))
 						) : (

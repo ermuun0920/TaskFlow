@@ -20,7 +20,10 @@ const Calendar = () => {
 			if (!user || !user.uid) return;
 
 			try {
-				const selectedDate = date.toISOString().split("T")[0]; // Format: YYYY-MM-DD
+				// const selectedDate = date.toISOString().split("T")[0]; // Format: YYYY-MM-DD
+				const selectedDate = date ?
+					`${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`
+					: new Date().toISOString().split("T")[0];
 				const q = query(collection(db, "Tasks", user.uid, "UserTasks"), where("date", "==", selectedDate));
 
 				const unsub = onSnapshot(q, (querySnapshot) => {
@@ -100,13 +103,10 @@ const Calendar = () => {
 						className="w-full border-none p-2 rounded-lg"
 						prevLabel={<ChevronLeft className="w-6 h-6 text-gray-600 hover:text-gray-900 transition" />}
 						nextLabel={<ChevronRight className="w-6 h-6 text-gray-600 hover:text-gray-900 transition" />}
-						tileClassName={({ date: tileDate, view }) =>
+						tileClassName={() =>
 							twMerge(
 								"py-2 text-center rounded-lg transition-all text-sm font-medium",
 								"hover:bg-gray-200",
-								tileDate.toDateString() === new Date().toDateString() && "bg-blue-600 text-white",
-								tileDate.toDateString() === date.toDateString() && "bg-blue-400 text-white",
-								[0, 6].includes(tileDate.getDay()) && "text-red-500" // Style weekends
 							)
 						}
 						calendarClassName="rounded-lg bg-gray-50 p-2 shadow-sm"

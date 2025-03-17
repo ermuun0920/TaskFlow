@@ -4,9 +4,11 @@ import { db, auth } from '../firebase'
 import { collection, query, onSnapshot, orderBy, limit, getDocs, getDoc, updateDoc, doc, deleteDoc, } from "firebase/firestore";
 
 const Home = () => {
+	const [date, setDate] = useState(new Date());
 	const [tasks, setTasks] = useState([]);
 	const [userDetails, setUserDetails] = useState(null);
 	const user = auth.currentUser;
+	const today = new Date().toDateString();
 
 	const fetchUserDetails = async () => {
 		auth.onAuthStateChanged(async (user) => {
@@ -112,6 +114,27 @@ const Home = () => {
 				</div>
 
 				<h2 className="mt-8 text-black text-2xl font-bold font-['Lexend Deca']">Calendar</h2>
+				<div className="">
+					<h2 className="text-lg font-semibold mt-4">Tasks for {date.toDateString()}</h2>
+					<ul className="mt-2 space-y-2">
+						{tasks.filter(task => new Date(task.date).toDateString() === today).length > 0 ? (
+							tasks
+								.filter(task => new Date(task.date).toDateString() === today)
+								.map((task) => (
+									<Task
+										key={task.id}
+										task={task}
+										tasks={tasks}
+										setTasks={setTasks}
+										toggleComplete={() => toggleComplete(task)}
+										deleteTask={() => deleteTask(task)}
+									/>
+								))
+						) : (
+							<p className="text-gray-500">No tasks for today</p>
+						)}
+					</ul>
+				</div>
 			</div>
 		</>
 	);
