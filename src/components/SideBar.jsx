@@ -37,7 +37,7 @@ const SideBar = () => {
             <NavLink
               to="/Home"
               className={({ isActive }) =>
-                `text-black text-lg font-bold font-['Lexend Deca'] block ${isActive ? 'underline' : ''} hover:text-gray-600`
+                `text-black text-lg font-bold font-['Lexend Deca'] block ${isActive ? 'underline' : ''} hover:text-gray-600 duration-300 ease-in-out`
               }
             >
               Home
@@ -57,7 +57,7 @@ const SideBar = () => {
             <NavLink
               to="/Tasks"
               className={({ isActive }) =>
-                `text-black text-lg font-bold font-['Lexend Deca'] block ${isActive ? 'underline' : ''} hover:text-gray-600`
+                `text-black text-lg font-bold font-['Lexend Deca'] block ${isActive ? 'underline' : ''} hover:text-gray-600 duration-300 ease-in-out`
               }
             >
               Tasks
@@ -77,7 +77,7 @@ const SideBar = () => {
             <NavLink
               to="/Calendar"
               className={({ isActive }) =>
-                `text-black text-lg font-bold font-['Lexend Deca'] block ${isActive ? 'underline' : ''} hover:text-gray-600`
+                `text-black text-lg font-bold font-['Lexend Deca'] block ${isActive ? 'underline' : ''} hover:text-gray-600 duration-300 ease-in-out`
               }
             >
               Calendar
@@ -108,7 +108,7 @@ const SideBar = () => {
             </svg>
           </div>
         </div>
-        <button className="text-black text-lg font-bold font-['Lexend Deca'] lg:block  cursor-pointer hover:text-gray-600 hidden" onClick={handleLogout}>
+        <button className="text-black text-lg font-bold font-['Lexend Deca'] lg:block  cursor-pointer hover:text-gray-600 hidden duration-300 ease-in-out" onClick={handleLogout}>
           Log Out
         </button>
       </div>
@@ -122,9 +122,6 @@ const SideBar = () => {
             </svg>
           </div>
         </div>
-        <button className="text-black text-lg font-bold font-['Lexend Deca'] lg:block  cursor-pointer hover:text-gray-600 hidden" onClick={handleLogout}>
-          Log Out
-        </button>
       </div>
       
       <div className="fixed bottom-0 left-0 w-full bg-violet-400/50 flex justify-around items-center py-2 lg:hidden shadow-ld rounded-t-2xl">

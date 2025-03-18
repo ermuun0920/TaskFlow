@@ -11,6 +11,7 @@ import { twMerge } from "tailwind-merge";
 const Calendar = () => {
 	const [userDetails, setUserDetails] = useState(null);
 	const [tasks, setTasks] = useState([]);
+	const [allTasks, setAllTasks] = useState({});
 	const [date, setDate] = useState(new Date());
 	const user = auth.currentUser;
 
@@ -84,6 +85,48 @@ const Calendar = () => {
 		}
 	};
 
+	useEffect(() => {
+		if (!user || !user.uid) return;
+
+		const fetchTasksForMonth = async () => {
+			const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+			const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+			const q = query(collection(db, "Tasks", user.uid, "UserTasks"), where("date", ">=", firstDay.toISOString().split("T")[0]), where("date", "<=", lastDay.toISOString().split("T")[0]));
+
+			const unsub = onSnapshot(q, (querySnapshot) => {
+				let taskMap = {};
+				querySnapshot.forEach((doc) => {
+					const taskData = doc.data();
+					if (!taskMap[taskData.date]) {
+						taskMap[taskData.date] = [];
+					}
+					taskMap[taskData.date].push({ ...taskData, id: doc.id });
+				});
+				setAllTasks(taskMap);
+			});
+
+			return () => unsub();
+		};
+
+		fetchTasksForMonth();
+	}, [user?.uid, date]);
+
+	// Fetch tasks for the selected day
+	useEffect(() => {
+		const selectedDate = date ?
+		`${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`
+		: new Date().toISOString().split("T")[0]
+		setTasks(allTasks[selectedDate] || []);
+	}, [allTasks, date]);
+
+	// Function to check if a date has tasks
+	const hasTasks = (date) => {
+		const formattedDate = date ?
+		`${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`
+		: new Date().toISOString().split("T")[0]
+		return allTasks[formattedDate] && allTasks[formattedDate].length > 0;
+	};
+
 	return (
 		<>
 			<div className="flex-1 p-6 lg:ml-72">
@@ -108,6 +151,9 @@ const Calendar = () => {
 								"py-2 text-center rounded-lg transition-all text-sm font-medium",
 								"hover:bg-gray-200",
 							)
+						}
+						tileContent={({ date }) =>
+							hasTasks(date) ? <div className="w-2 h-2 bg-purple-400 rounded-full mx-auto mt-1"></div> : null
 						}
 						calendarClassName="rounded-lg bg-gray-50 p-2 shadow-sm"
 					/>

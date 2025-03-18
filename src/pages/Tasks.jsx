@@ -7,8 +7,11 @@ const Tasks = () => {
 	const [date, setDate] = useState(new Date());
 	const [tasks, setTasks] = useState([]);
 	const [input, setInput] = useState('');
+	const [importance, setImportance] = useState('Normal');
 	const [userDetails, setUserDetails] = useState(null);
 	const user = auth.currentUser;
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
 	// Create
 	const addTask = async (e) => {
@@ -27,14 +30,18 @@ const Tasks = () => {
 				text: input,
 				completed: false,
 				createdAt: serverTimestamp(),
-				date: selectedDate 
+				date: selectedDate,
+				importance
 			});
+			setInput('');
+			setImportance('Normal'); 
 
 			// Reset input field
 			setInput('');
 		} catch (error) {
 			console.error("Error adding task:", error);
 		}
+		setIsModalOpen(false);
 	}
 
 	// Read
@@ -81,6 +88,19 @@ const Tasks = () => {
 		fetchUserDetails();
 	}, []);
 
+	const getImportanceColor = (level) => {
+		switch (level) {
+			case "Low":
+				return "bg-green-500"; // Green
+			case "Normal":
+				return "bg-yellow-500"; // Yellow
+			case "High":
+				return "bg-red-500"; // Red
+			default:
+				return "bg-gray-500"; // Default
+		}
+	};
+
 	// Update
 	const toggleComplete = async (task) => {
 		const user = auth.currentUser;
@@ -93,7 +113,7 @@ const Tasks = () => {
 			console.error("Error updating task:", error);
 		}
 	};
-	
+
 
 	// Delete
 	const deleteTask = async (task) => {
@@ -122,7 +142,7 @@ const Tasks = () => {
 					)}
 				</div>
 
-				<div className="flex mt-6 w-1/2">
+				{/* <div className="flex mt-6 w-1/2">
 					<input
 						value={input}
 						onChange={(e) => setInput(e.target.value)}
@@ -139,7 +159,78 @@ const Tasks = () => {
 					<button onClick={addTask} className="bg-violet-400 text-white px-5 py-2 rounded-r-lg hover:bg-violet-600">
 						Add
 					</button>
+				</div> */}
+
+<div>
+					{/* Add Task Button */}
+					<button
+						onClick={() => setIsModalOpen(true)}
+						className="bg-violet-400 text-white px-5 py-2 rounded-lg hover:bg-violet-600 duration-300 ease-in-out mt-6"
+					>
+						Add Task
+					</button>
+
+					{/* Overlay Modal */}
+					{isModalOpen && (
+						<div className="fixed inset-0 flex items-center justify-center z-10 bg-black/50 backdrop-blur-sm transition-opacity duration-600">
+							<div className="bg-white p-6 rounded-lg shadow-lg w-[70vw] lg:max-w-1/2 relative">
+								{/* Close Button */}
+								<button
+									onClick={() => setIsModalOpen(false)}
+									className="absolute top-2 right-2 text-gray-600 hover:text-gray-900"
+								>
+									✖
+								</button>
+
+								{/* Task Input Form */}
+								<h2 className="text-xl font-bold mb-4">Add a New Task</h2>
+								<div className="flex flex-col space-y-6">
+									<input
+										value={input}
+										onChange={(e) => setInput(e.target.value)}
+										type="text"
+										placeholder="Add a new task"
+										className="flex-grow px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-400"
+									/>
+									{/* Importance Dropdown */}
+									<div className="relative w-1/2">
+										<button
+											onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+											className="border rounded-md px-3 py-2 flex items-center space-x-2 w-full focus:outline-none focus:ring-2 focus:ring-purple-400"
+										>
+											<span className={`w-4 h-4 rounded-full ${getImportanceColor(importance)}`}></span>
+											<span>{importance}</span>
+										</button>
+
+										{isDropdownOpen && (
+											<div className="absolute left-0 mt-1 w-full bg-white border rounded-md shadow-lg">
+												<button onClick={() => { setImportance("Low"); setIsDropdownOpen(false); }} className="flex items-center p-2 w-full hover:bg-gray-200">
+													<span className="w-4 h-4 rounded-full bg-green-500 mr-2"></span> Low
+												</button>
+												<button onClick={() => { setImportance("Normal"); setIsDropdownOpen(false); }} className="flex items-center p-2 w-full hover:bg-gray-200">
+													<span className="w-4 h-4 rounded-full bg-yellow-500 mr-2"></span> Normal
+												</button>
+												<button onClick={() => { setImportance("High"); setIsDropdownOpen(false); }} className="flex items-center p-2 w-full hover:bg-gray-200">
+													<span className="w-4 h-4 rounded-full bg-red-500 mr-2"></span> High
+												</button>
+											</div>
+										)}
+									</div>
+									<input
+										type="date"
+										value={date.toISOString().split("T")[0]}
+										onChange={(e) => setDate(new Date(e.target.value))}
+										className="border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 lg:w-[30%] w-[80%]"
+									/>
+
+
+									<button onClick={addTask} className="bg-violet-400 text-white px-5 py-2 rounded-md hover:bg-violet-600 duration-300 ease-in-out">Add</button>
+								</div>
+							</div>
+						</div>
+					)}
 				</div>
+
 
 				<ul className="mt-6 space-y-4 list-none">
 					{
