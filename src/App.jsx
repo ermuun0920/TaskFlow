@@ -24,10 +24,7 @@ function Layout() {
     <div className='min-h-screen bg-white flex flex-col lg:flex-row'>
       {!hideSidebarPaths.includes(location.pathname) && <SideBar />}
       <Routes>
-        <Route
-          path="/"
-          element={user ? <Navigate to="/Home" /> : <LogIn />}
-        />
+        <Route path="/" element={user ? <Navigate to="/Home" /> : <LogIn />}/>
         <Route path='/Home' element={<Home />} />
         <Route path='/Tasks' element={<Tasks />} />
         <Route path='/LogIn' element={<LogIn />} />

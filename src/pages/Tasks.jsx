@@ -34,7 +34,7 @@ const Tasks = () => {
 				importance
 			});
 			setInput('');
-			setImportance('Normal'); 
+			setImportance('Normal');
 
 			// Reset input field
 			setInput('');
@@ -142,26 +142,7 @@ const Tasks = () => {
 					)}
 				</div>
 
-				{/* <div className="flex mt-6 w-1/2">
-					<input
-						value={input}
-						onChange={(e) => setInput(e.target.value)}
-						type="text"
-						placeholder='Add a new task'
-						className="flex-grow px-3 py-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-purple-400"
-					/>
-					<input
-						type="date"
-						value={date.toISOString().split("T")[0]}
-						onChange={(e) => setDate(new Date(e.target.value))}
-						className="border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
-					/>
-					<button onClick={addTask} className="bg-violet-400 text-white px-5 py-2 rounded-r-lg hover:bg-violet-600">
-						Add
-					</button>
-				</div> */}
-
-<div>
+				<div>
 					{/* Add Task Button */}
 					<button
 						onClick={() => setIsModalOpen(true)}
